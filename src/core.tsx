@@ -56,6 +56,7 @@ export default class EChartsReactCore extends PureComponent<EChartsReactProps> {
     if (
       !isEqual(prevProps.theme, this.props.theme) ||
       !isEqual(prevProps.opts, this.props.opts) ||
+      !isEqual(prevProps.eventQueries, this.props.eventQueries) ||
       !isEqual(prevProps.onEvents, this.props.onEvents)
     ) {
       this.dispose();
@@ -137,7 +138,7 @@ export default class EChartsReactCore extends PureComponent<EChartsReactProps> {
    * render a new echarts instance
    */
   private async renderNewEcharts() {
-    const { onEvents, onChartReady, autoResize = true } = this.props;
+    const { onEvents, eventQueries, onChartReady, autoResize = true } = this.props;
 
     // 1. init echarts instance
     await this.initEchartsInstance();
@@ -146,7 +147,7 @@ export default class EChartsReactCore extends PureComponent<EChartsReactProps> {
     const echartsInstance = this.updateEChartsOption();
 
     // 3. bind events
-    this.bindEvents(echartsInstance, onEvents || {});
+    this.bindEvents(echartsInstance, eventQueries || {}, onEvents || {});
 
     // 4. on chart ready
     if (isFunction(onChartReady)) onChartReady(echartsInstance);
@@ -160,12 +161,12 @@ export default class EChartsReactCore extends PureComponent<EChartsReactProps> {
   }
 
   // bind the events
-  private bindEvents(instance, events: EChartsReactProps['onEvents']) {
-    function _bindEvent(eventName: string, func: Function) {
+  private bindEvents(instance, eventQueries: EChartsReactProps['eventQueries'], events: EChartsReactProps['onEvents']) {
+    function _bindEvent(eventName: string, queries: any, func: Function) {
       // ignore the event config which not satisfy
       if (isString(eventName) && isFunction(func)) {
         // binding event
-        instance.on(eventName, (param) => {
+        instance.on(eventName, queries, (param) => {
           func(param, instance);
         });
       }
@@ -174,7 +175,7 @@ export default class EChartsReactCore extends PureComponent<EChartsReactProps> {
     // loop and bind
     for (const eventName in events) {
       if (Object.prototype.hasOwnProperty.call(events, eventName)) {
-        _bindEvent(eventName, events[eventName]);
+        _bindEvent(eventName, eventQueries[eventName], events[eventName]);
       }
     }
   }

@@ -64,6 +64,10 @@ export type EChartsReactProps = {
    */
   readonly onEvents?: Record<string, Function>;
   /**
+   * bind queties with events, default is `{}`
+   */
+  readonly eventQueries?: Record<string, any>;
+  /**
    * should update echarts options
    */
   readonly shouldSetOption?: (prevProps: EChartsReactProps, props: EChartsReactProps) => boolean;
